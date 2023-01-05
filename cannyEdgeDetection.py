@@ -158,7 +158,7 @@ if __name__ == "__main__":
                             image_xy[i, j] = 0
 
         # Showing the Lenna image here.
-        cv2.imshow("lenna_after", image_xy)
+        cv2.imshow("Canny Edge applied Image", image_xy)
         cv2.waitKey(5000)
     
     except getopt.error as err:
