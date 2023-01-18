@@ -157,6 +157,9 @@ if __name__ == "__main__":
                         else:
                             image_xy[i, j] = 0
 
+        # Saving the image in the current folder.
+        cv2.imwrite("output.jpg", image_xy)
+
         # Showing the Lenna image here.
         cv2.imshow("Canny Edge applied Image", image_xy)
         cv2.waitKey(5000)
