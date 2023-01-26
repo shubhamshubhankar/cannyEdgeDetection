@@ -118,8 +118,8 @@ if __name__ == "__main__":
         # Image with both horizontal and vertical Sobel kernels applied.
         for i in range(1, rows - 1):
           for j in range(1, cols - 1): 
-              theta[i][j] = math.atan2(y[i][j], x[i][j]) * 360/ np.pi
-              print("theta ", theta[i][j])
+              theta[i][j] = np.rad2deg(math.atan2(y[i][j], x[i][j]))
+              #print("theta ", theta[i][j])
         
         '''
             Non Maximum Suppression
