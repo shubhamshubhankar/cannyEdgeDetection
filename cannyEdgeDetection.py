@@ -27,7 +27,7 @@ if __name__ == "__main__":
                 "lowThreshold - Value of the low threshold for the doubleThresholding operation.(Integer data type)\n"
                 "highThreshold - Value of the low threshold for the doubleThresholding operation.(Integer data type)\n\n"
                 "Example : \n"
-                "python3 cannyEdgeDetection.py 3.jpg 3 5 20 100\n"
+                "python3 cannyEdgeDetection.py 3.jpg 3 5 20 60\n"
                 "\n----------------------------------------------------------------------------------------------------------------------\n")
             exit(0)
         else:
@@ -42,13 +42,22 @@ if __name__ == "__main__":
         # Convert to grayScale image.
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
+        # Saving the gray image in the current folder.
+        cv2.imwrite("gray.jpg", gray)
+        
         # Apply Gaussian Filter on the image of size 3*3 in order to blur it.
         blur = cv2.GaussianBlur(gray,(gaussianKernalSize,gaussianKernalSize),0)
+        
+        # Saving the blur image in the current folder.
+        cv2.imwrite("blur.jpg", blur)
 
         ''' 
             Apply the Sobel operator on the image and also finding out the
             theta between these values.
         '''
+        # All the operations now will be done on gray image.
+        gray = blur
+
         # Applying the sobel operator in X direction with kernel size 3 and
         # depth 64 bit float.
         x = cv2.Sobel(gray, cv2.CV_64F, 1,0, ksize= sobelKernalSize, scale=1)
@@ -139,11 +148,13 @@ if __name__ == "__main__":
                         resultant[i, j] = 1
                     elif image_xy[i, j] > strong_threshold:
                         resultant[i, j] = 2
+        
+        # Saving the image in the current folder.
+        cv2.imwrite("output.jpg", image_xy)
 
         '''
         Performing hysteresis in order to convert weak edges into strong edges where
         they are linked with a strong edge.
-        '''
         for i in range(1, rows-1):
                 for j in range(1, cols-1):
                     # If the current pixel is a weak edge.
@@ -156,9 +167,41 @@ if __name__ == "__main__":
                             image_xy[i, j] = image_xy[i, j]
                         else:
                             image_xy[i, j] = 0
+        '''
+        for i in range(1, rows-1):
+                for j in range(1, cols-1):
+                    # If the current pixel is a weak edge.
+                    if resultant[i, j] == 1:
+                        # If any of the surrounding pixel is a strong edge, then
+                        # the current pixel will also be considered as a strong edge.
+                        # General direction along 0 degree
+                        if (0 <= theta[i,j] < 22.5) or (157.5 <= theta[i,j] < 202.5)  or (337.5 <= theta[i,j] <= 360):
+                            nextComponent = resultant[i, j+1]
+                            prevComponent = resultant[i, j-1]
+                        
+                        # General direction along 45 degree
+                        elif (22.5 <= theta[i,j] < 67.5) or (202.5 <= theta[i,j] < 247.5):
+                            nextComponent = resultant[i+1, j-1]
+                            prevComponent = resultant[i-1, j+1]
+                        
+                        # General direction along 90 degree
+                        elif (67.5 <= theta[i,j] < 112.5) or ((247.5 <= theta[i,j] < 292.5)):
+                            nextComponent = resultant[i+1, j]
+                            prevComponent = resultant[i-1, j]
+                        
+                        # General direction along 135 degree
+                        elif (112.5 <= theta[i,j] < 157.5) or (292.5 <= theta[i,j] < 337.5):
+                            nextComponent = resultant[i-1, j-1]
+                            nextComponent = resultant[i+1, j+1]
 
-        # Saving the image in the current folder.
-        cv2.imwrite("output.jpg", image_xy)
+                        # If the value of the current pixel is greater than prev pixel and the
+                        # next pixel in the direction of the theta, then it will save the value
+                        # otherwise it will store it as 0.
+                        if (nextComponent == 2) or (prevComponent == 2):
+                            image_xy[i,j] = image_xy[i, j]
+                        else:
+                            image_xy[i, j] = 0
+
 
         # Showing the Lenna image here.
         cv2.imshow("Canny Edge applied Image", image_xy)
